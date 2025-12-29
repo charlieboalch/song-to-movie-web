@@ -102,7 +102,7 @@ const MovieResults = ({data, dispatch}: MovieResultsProps) => {
     }
 
     return <SubSection>
-        <Typography variant={'h4'} align={'center'}>Top Movies</Typography>
+        <Typography variant={'h4'} align={'center'}>Most Similar Movies</Typography>
         <MovieGrid>
             {analysis.movies.map(e =>
                 <MovieDisplay movie={e.movie} score={e.score} url={e.url} />)}

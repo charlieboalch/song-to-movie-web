@@ -11,7 +11,7 @@ const Content = styled('div')`
     flex-direction: column;
 `
 
-export const App = () => {
+export const Home = () => {
     const [client, setSpotifySdk] = useState<SpotifyApi | null>(null);
 
     const body = (client == null) ? <Auth setSpotifySdk={setSpotifySdk} />
