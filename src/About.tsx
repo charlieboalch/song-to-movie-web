@@ -1,3 +1,5 @@
+import {Typography} from "@mui/material"
+
 export const About = () => {
-    return <div></div>
+    return <Typography variant={'body1'}>Song to movie mapping</Typography>
 }

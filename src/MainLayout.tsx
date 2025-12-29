@@ -1,5 +1,6 @@
 import {Outlet, useNavigate} from "react-router";
 import {Button, styled, Typography} from "@mui/material";
+import {Content} from "./lib/Content.tsx";
 
 const Navbar = styled('div')`
     display: flex;
@@ -30,6 +31,8 @@ export const MainLayout = () => {
                 </Button>
             </Flex>
         </Navbar>
-        <Outlet />
+        <Content>
+            <Outlet />
+        </Content>
     </>
 }

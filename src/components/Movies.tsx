@@ -220,7 +220,7 @@ const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
             </Select>
         </FormControl>
         {searchMenu}
-        <TrackDetails analysis={trackVectors} expected={tracks.split(',').length} />
+        <TrackDetails analysis={trackVectors} expected={(tracks == '') ? 0 : tracks.split(',').length} />
     </SubSection>
 }
 
@@ -245,6 +245,10 @@ const TrackDetails = ({analysis, expected}: TrackDetailProps) => {
     }
 
     if (analysis == null || analysis.length == 0) {
+        if (expected == 0) {
+            return <div></div>
+        }
+
         return <SubSection style={{paddingTop: '5%', gap: 5}}>
             <LinearProgress variant={'indeterminate'} />
         </SubSection>
