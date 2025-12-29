@@ -14,22 +14,20 @@ export interface UserData {
 export interface UserProfileProps {
     client: SpotifyApi,
     promise: ISuspender<UserData>,
-    dispatch: React.Dispatch<React.SetStateAction<Track[]>>,
-    trackData: MovieAnalysis | null
+    dispatch: React.Dispatch<React.SetStateAction<MovieAnalysis | null>>,
 }
 
 export interface MovieResultsProps {
-    data: ISuspender<MovieAnalysis>,
-    dispatch: React.Dispatch<React.SetStateAction<MovieAnalysis | null>>
+    data: MovieAnalysis | null
 }
 
 export interface TrackDetailProps {
-    analysis: MovieAnalysis | null
+    analysis: Song[] | null,
+    expected: number
 }
 
 export interface MovieAnalysis {
     movies: Movie[],
-    songs: Song[]
 }
 
 export interface Movie {

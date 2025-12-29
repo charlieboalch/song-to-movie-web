@@ -1,5 +1,5 @@
-import {Button, FormControl, InputLabel, ListSubheader, MenuItem, Select, type SelectChangeEvent, styled, TextField, Typography} from "@mui/material"
-import {type Track} from "@spotify/web-api-ts-sdk";
+import {Button, FormControl, InputLabel,
+    LinearProgress, ListSubheader, MenuItem, Select, type SelectChangeEvent, styled, TextField, Typography} from "@mui/material"
 import {Suspense, useEffect, useMemo, useState} from "react";
 import {createSuspender} from "../lib/suspense.ts";
 import type {
@@ -56,22 +56,7 @@ export const Movies = ({ client }: MoviesProps) => {
         }
     }
 
-    const fetchTracks = async () => {
-        if (tracks.length != 0) {
-            console.log('fetching')
-
-            const mappedTracks = tracks.map(e => e.external_ids.isrc)
-            const r = await fetch(" http://127.0.0.1:5000/rank_movies?songs=" + mappedTracks.join(","))
-            return await r.json()
-        }
-    }
-
-    const [tracks, setTracks] = useState<Track[]>([])
-    const [analysis, setAnalysis] = useState<MovieAnalysis | null>(null)
-
-    const movieData = useMemo(() => {
-        return createSuspender(fetchTracks())
-    }, [tracks]);
+    const [movies, setMovies] = useState<MovieAnalysis | null>(null)
 
     const userData = useMemo(() => {
         return createSuspender(loadUserData())
@@ -79,23 +64,14 @@ export const Movies = ({ client }: MoviesProps) => {
 
     return <Content>
         <Suspense>
-            <MovieResults data={movieData} dispatch={setAnalysis}/>
-            <UserProfile client={client} promise={userData} dispatch={setTracks} trackData={analysis}/>
+            <MovieResults data={movies} />
+            <UserProfile client={client} promise={userData} dispatch={setMovies}/>
         </Suspense>
     </Content>
 }
 
-const MovieResults = ({data, dispatch}: MovieResultsProps) => {
-    const analysis = data.read()
-
-    useEffect(() => {
-        dispatch(prev => {
-            if (prev === analysis) return prev;
-            return analysis;
-        });
-    }, [analysis]);
-
-    if (analysis == undefined) {
+const MovieResults = ({data}: MovieResultsProps) => {
+    if (data == null) {
         return <SubSection>
             <p>no results</p>
         </SubSection>
@@ -104,7 +80,7 @@ const MovieResults = ({data, dispatch}: MovieResultsProps) => {
     return <SubSection>
         <Typography variant={'h4'} align={'center'}>Most Similar Movies</Typography>
         <MovieGrid>
-            {analysis.movies.map(e =>
+            {data.movies.map(e =>
                 <MovieDisplay movie={e.movie} score={e.score} url={e.url} />)}
         </MovieGrid>
     </SubSection>
@@ -117,9 +93,11 @@ const MovieDisplay = ({movie, score, url}: Movie) => {
     </PosterLayout>
 }
 
-const UserProfile = ({client, promise, dispatch, trackData}: UserProfileProps) => {
+const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
     const [playlist, updatePlaylist] = useState("")
     const [search, updateSearch] = useState("")
+    const [tracks, updateTracks] = useState<string>('')
+    const [trackVectors, addTrackVector] = useState([])
     const data = promise.read()
 
     const getSongData = async (event: SelectChangeEvent) => {
@@ -148,7 +126,7 @@ const UserProfile = ({client, promise, dispatch, trackData}: UserProfileProps) =
                 tracks = playlistData.tracks.items.map(e => e.track)
         }
 
-        dispatch(tracks)
+        updateTracks(tracks.map(e => e.external_ids.isrc).join(','))
     }
 
     const searchTrack = async (title: string) => {
@@ -162,13 +140,51 @@ const UserProfile = ({client, promise, dispatch, trackData}: UserProfileProps) =
     }
 
     const dispatchSearch = async () => {
-        const track = await searchTrack(search);
-        if (track == null) {
+        const foundTrack = await searchTrack(search);
+        if (foundTrack == null) {
             return
         }
 
-        dispatch([track])
+        updateTracks(foundTrack.external_ids.isrc)
     }
+
+    useEffect(() => {
+        console.log('opening connection')
+
+        if (tracks == '') {
+            return
+        }
+
+        addTrackVector([])
+        dispatch(null)
+
+        const url = "http://127.0.0.1:8000/rank_movies?songs=" + tracks
+
+        const eventSource = new EventSource(url);
+
+        eventSource.onmessage = (e) => {
+            try {
+                let data = e.data
+                if (typeof data == 'string') {
+                    data = JSON.parse(data)
+                }
+
+                if ('track' in data) {
+                    addTrackVector(prevState => prevState.concat(data))
+                } else {
+                    dispatch(data)
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
+        eventSource.onerror = (_) => { eventSource.close(); };
+
+        return () => {
+            eventSource.close();
+        };
+    }, [tracks]);
 
     const playlistSelections = data.playlists
         .map(e => <MenuItem value={e.id}>{e.name}</MenuItem>)
@@ -204,11 +220,11 @@ const UserProfile = ({client, promise, dispatch, trackData}: UserProfileProps) =
             </Select>
         </FormControl>
         {searchMenu}
-        <TrackDetails analysis={trackData} />
+        <TrackDetails analysis={trackVectors} expected={tracks.split(',').length} />
     </SubSection>
 }
 
-const TrackDetails = ({analysis}: TrackDetailProps) => {
+const TrackDetails = ({analysis, expected}: TrackDetailProps) => {
     const vectorToIcons = (vector: any) => {
         const result = []
         for (const i of vector) {
@@ -228,16 +244,21 @@ const TrackDetails = ({analysis}: TrackDetailProps) => {
         return result
     }
 
-    if (analysis == null) {
-        return <div></div>
+    if (analysis == null || analysis.length == 0) {
+        return <SubSection style={{paddingTop: '5%', gap: 5}}>
+            <LinearProgress variant={'indeterminate'} />
+        </SubSection>
     }
 
     const averageVector = [0, 0, 0, 0, 0, 0]
-    for (const i of analysis.songs) {
+    for (const i of analysis) {
         for (let j = 0; j < i.vector.length; j++) {
-            averageVector[j] += (i.vector[j] / analysis.songs.length);
+            averageVector[j] += (i.vector[j] / analysis.length);
         }
     }
+
+    const progress = (analysis.length == 0) ? <LinearProgress variant={'indeterminate'} />
+    : <LinearProgress variant={'determinate'} value={(analysis.length / expected) * 100} />
 
     return <SubSection style={{paddingTop: '5%', gap: 5}}>
         <TrackInfo>
@@ -246,7 +267,7 @@ const TrackDetails = ({analysis}: TrackDetailProps) => {
                 <Typography variant={'body2'}>Mood, Energy, Grit, Tension, Warmth, Humor</Typography>
             </div>
         </TrackInfo>
-        {analysis.songs.map(e => <TrackInfo key={e.track}>
+        {analysis.map(e => <TrackInfo key={e.track}>
             <Typography variant={'body1'}>{e.track}</Typography>
             <div>{vectorToIcons(e.vector)}</div>
         </TrackInfo>)}
@@ -255,5 +276,6 @@ const TrackDetails = ({analysis}: TrackDetailProps) => {
             <Typography variant={'body1'}>Song Average</Typography>
             <div>{vectorToIcons(averageVector)}</div>
         </TrackInfo>
+        {progress}
     </SubSection>
 }
