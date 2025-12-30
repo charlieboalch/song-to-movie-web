@@ -1,6 +1,7 @@
 import {Button, styled, Typography} from "@mui/material";
 import {SpotifyApi} from "@spotify/web-api-ts-sdk";
 import * as React from "react";
+import {getRedirect} from "../lib/environment.ts";
 
 const Content = styled('div')`
     display: flex;
@@ -28,7 +29,7 @@ interface AuthParams {
 export const Auth = ({ setSpotifySdk }: AuthParams) => {
     const spotifyAuth = async () => {
         const client = SpotifyApi.withUserAuthorization(
-            "d7643f41b89b4f0f9b62ad17dd411317", "http://127.0.0.1:5173",
+            "d7643f41b89b4f0f9b62ad17dd411317", getRedirect(),
             ["playlist-read-private", "user-top-read"]);
 
         setSpotifySdk(client)

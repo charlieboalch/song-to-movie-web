@@ -9,6 +9,7 @@ import type {
     UserProfileProps
 } from "./Movies.types.ts";
 import {LuArrowDown, LuArrowDownRight, LuArrowRight, LuArrowUp, LuArrowUpRight} from "react-icons/lu";
+import {getApi} from "../lib/environment.ts";
 
 const Content = styled('div')`
     display: flex;
@@ -158,7 +159,7 @@ const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
         addTrackVector([])
         dispatch(null)
 
-        const url = "http://127.0.0.1:8000/rank_movies?songs=" + tracks
+        const url = getApi() + tracks
 
         const eventSource = new EventSource(url);
 
