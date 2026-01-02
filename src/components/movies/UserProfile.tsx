@@ -31,7 +31,6 @@ const UserDialog = ({ children }: UserDialogProps) => {
     const [open, setOpen] = useState(false);
 
     const handleClickOpen = () => {
-        console.log('hello')
         setOpen(true);
     };
 
@@ -112,8 +111,6 @@ export const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
     }
 
     useEffect(() => {
-        console.log('opening connection')
-
         if (tracks == '') {
             return
         }
@@ -187,7 +184,6 @@ export const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
     </DynamicPadding>
 
     const windowSize = getWindowSize()
-    console.log(windowSize)
 
     if (windowSize[0] <= 768) {
         return <UserDialog>
