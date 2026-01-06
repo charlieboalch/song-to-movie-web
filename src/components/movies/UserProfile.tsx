@@ -238,7 +238,7 @@ const TrackDetails = ({analysis, expected}: TrackDetailProps) => {
         <TrackInfo>
             <Typography variant={'body2'}>Track Title</Typography>
             <div>
-                <Typography variant={'body2'}>Mood, Energy, Grit, Tension, Warmth, Humor</Typography>
+                <Typography variant={'body2'}>Mood, Energy, Grit, Tension, Romance, Humor</Typography>
             </div>
         </TrackInfo>
         {analysis.map(e => <TrackInfo key={e.track}>

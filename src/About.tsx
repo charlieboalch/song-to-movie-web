@@ -10,7 +10,7 @@ export const About = () => {
     return <>
         <InfoSection>
             <Typography variant={'h4'}>How does it work?</Typography>
-            <Typography variant={'body1'}>The easiest way to think about it is to ask what movies are "pointing" in the same direction as a song. Songs and movies are encoded in six different dimensions- valence (or mood), energy, darkness, tension, warmth, and humor. If a user inputs a playlist, we take the average of all the songs in that playlist. The song vector is then projected into movie space, and the ranking algorithm uses both cosine similarity and the vector's Euclidean norm to find the movies with the most similar dimensions.</Typography>
+            <Typography variant={'body1'}>The easiest way to think about it is to ask what movies are "pointing" in the same direction as a song. Songs and movies are encoded in six different dimensions- valence (or mood), energy, darkness, tension, romance, and humor. If a user inputs a playlist, we take the average of all the songs in that playlist. The song vector is then projected into movie space, and the ranking algorithm uses both cosine similarity and the vector's Euclidean norm to find the movies with the most similar dimensions.</Typography>
             <img src={'/flowchart.png'}/>
         </InfoSection>
         <InfoSection>
