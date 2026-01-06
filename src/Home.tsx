@@ -6,7 +6,7 @@ import {useSearchParams} from "react-router";
 import {getRedirect} from "./lib/environment.ts";
 
 export const Home = () => {
-    const [client, setSpotifySdk] = useState<SpotifyApi | null>(null);
+    const [client, setSpotifySdk] = useState<SpotifyApi | string | null>(null);
     const [authenticated, setAuthenticated] = useState(false)
 
     const [params] = useSearchParams()

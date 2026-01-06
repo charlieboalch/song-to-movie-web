@@ -2,9 +2,9 @@ export const isDev = () => !process.env.NODE_ENV || process.env.NODE_ENV === 'de
 
 export const getApi = () => {
     if (!isDev()) {
-        return "https://song.phqsh.me/api/rank_movies?songs="
+        return "https://song.phqsh.me/api/"
     } else {
-        return "http://127.0.0.1:8000/rank_movies?songs="
+        return "http://127.0.0.1:8000/"
     }
 }
 

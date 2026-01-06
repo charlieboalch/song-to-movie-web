@@ -10,6 +10,8 @@ import {Section} from "../lib/Content.tsx";
 
 export const Movies = ({ client }: MoviesProps) => {
     const loadUserData = async () => {
+        if (typeof client == 'string') return null
+
         const shortTerm = await client.currentUser.topItems('tracks', 'short_term', 10);
         const mediumTerm = await client.currentUser.topItems('tracks', 'medium_term', 10);
         const longTerm = await client.currentUser.topItems('tracks', 'long_term', 10);

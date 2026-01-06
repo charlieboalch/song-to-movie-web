@@ -1,9 +1,10 @@
 import {type SimplifiedPlaylist, SpotifyApi, type Track} from "@spotify/web-api-ts-sdk";
 import type {ISuspender} from "../lib/suspense.ts";
 import * as React from "react";
+import type {ReactNode} from "react";
 
 export interface MoviesProps {
-    client: SpotifyApi
+    client: string | SpotifyApi
 }
 
 export interface UserData {
@@ -12,9 +13,15 @@ export interface UserData {
 }
 
 export interface UserProfileProps {
-    client: SpotifyApi,
-    promise: ISuspender<UserData>,
+    client: string | SpotifyApi,
+    promise: ISuspender<UserData | null>,
     dispatch: React.Dispatch<React.SetStateAction<MovieAnalysis | null>>,
+}
+
+export interface ZeroAuthProfile {
+    searchMenu: ReactNode,
+    trackVectors: Song[],
+    tracks: string
 }
 
 export interface MovieResultsProps {

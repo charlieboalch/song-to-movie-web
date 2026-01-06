@@ -1,5 +1,5 @@
 import styled from "@emotion/styled"
-import type {TrackDetailProps, UserProfileProps } from "../Movies.types"
+import type {TrackDetailProps, UserProfileProps, ZeroAuthProfile} from "../Movies.types"
 import {type ReactNode, useEffect, useState} from "react"
 import {AppBar, Button, Dialog, Fab, FormControl, IconButton, InputLabel,
     LinearProgress, ListSubheader, MenuItem, Select, TextField, Toolbar, Typography, type SelectChangeEvent } from "@mui/material"
@@ -8,6 +8,7 @@ import {LuArrowDown, LuArrowDownRight, LuArrowRight, LuArrowUp, LuArrowUpRight, 
 import {getWindowSize} from "../../lib/hooks.tsx";
 import {Section, SubSection} from "../../lib/Content.tsx";
 import {IoMdClose} from "react-icons/io";
+import {SpotifyApi, type Track} from "@spotify/web-api-ts-sdk";
 
 const TrackInfo = styled('div')`
     display: flex;
@@ -55,60 +56,19 @@ const UserDialog = ({ children }: UserDialogProps) => {
     </>
 }
 
+const ZeroAuthProfile = ({searchMenu, trackVectors, tracks}: ZeroAuthProfile) => {
+    return <DynamicPadding>
+        {searchMenu}
+        <TrackDetails analysis={trackVectors} expected={(tracks == '') ? 0 : tracks.split(',').length} />
+    </DynamicPadding>
+}
+
 export const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
-    const [playlist, updatePlaylist] = useState("")
+    const [playlist, updatePlaylist] = useState("-1")
     const [search, updateSearch] = useState("")
     const [tracks, updateTracks] = useState<string>('')
     const [trackVectors, addTrackVector] = useState([])
     const data = promise.read()
-
-    const getSongData = async (event: SelectChangeEvent) => {
-        const selected = event.target.value;
-        updatePlaylist(selected);
-
-        // search is -1
-        if (selected == '-1') {
-            return
-        }
-
-        let tracks = []
-        // fetch playlist songs
-        switch (selected) {
-            case '0':
-                tracks = data.top_tracks[0]
-                break
-            case '1':
-                tracks = data.top_tracks[1]
-                break
-            case '2':
-                tracks = data.top_tracks[2]
-                break
-            default:
-                const playlistData = await client.playlists.getPlaylist(selected)
-                tracks = playlistData.tracks.items.map(e => e.track)
-        }
-
-        updateTracks(tracks.map(e => e.external_ids.isrc).join(','))
-    }
-
-    const searchTrack = async (title: string) => {
-        const searchResults = await client.search(title, ['track'])
-
-        if (searchResults.tracks == null) {
-            return null
-        }
-
-        return searchResults.tracks.items[0]
-    }
-
-    const dispatchSearch = async () => {
-        const foundTrack = await searchTrack(search);
-        if (foundTrack == null) {
-            return
-        }
-
-        updateTracks(foundTrack.external_ids.isrc)
-    }
 
     useEffect(() => {
         if (tracks == '') {
@@ -118,7 +78,7 @@ export const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
         addTrackVector([])
         dispatch(null)
 
-        const url = getApi() + tracks
+        const url = getApi() + "rank_movies?songs=" + tracks
 
         const eventSource = new EventSource(url);
 
@@ -146,8 +106,14 @@ export const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
         };
     }, [tracks]);
 
-    const playlistSelections = data.playlists
-        .map(e => <MenuItem value={e.id}>{e.name}</MenuItem>)
+    const dispatchSearch = async () => {
+        const foundTrack = await searchTrack(search);
+        if (foundTrack == null) {
+            return
+        }
+
+        updateTracks(foundTrack.external_ids.isrc)
+    }
 
     const searchMenu = <Section style={{display: (playlist == '-1') ? 'flex' : 'none', paddingTop: 10}}>
         <TextField
@@ -159,6 +125,59 @@ export const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
         />
         <Button style={{flex: 1}} onClick={dispatchSearch}>Go!</Button>
     </Section>
+
+    const searchTrack = async (title: string) => {
+        if (typeof client == 'string') {
+            const resp = await fetch(getApi() + "search?song=" + title)
+            return await resp.json()
+        }
+
+        const searchResults = await client.search(title, ['track'])
+
+        if (searchResults.tracks == null) {
+            return null
+        }
+
+        return searchResults.tracks.items[0]
+    }
+
+    if (data == null && typeof client == 'string') {
+        return <ZeroAuthProfile searchMenu={searchMenu} trackVectors={trackVectors} tracks={tracks} />
+    }
+
+    const getSongData = async (event: SelectChangeEvent) => {
+        const selected = event.target.value;
+        updatePlaylist(selected);
+
+        // search is -1
+        if (selected == '-1') {
+            return
+        }
+
+        let tracks: Track[] = []
+        // fetch playlist songs
+        switch (selected) {
+            case '0':
+                tracks = data!.top_tracks[0]
+                break
+            case '1':
+                tracks = data!.top_tracks[1]
+                break
+            case '2':
+                tracks = data!.top_tracks[2]
+                break
+            default:
+                if (client instanceof SpotifyApi) {
+                    const playlistData = await client.playlists.getPlaylist(selected)
+                    tracks = playlistData.tracks.items.map(e => e.track)
+                }
+        }
+
+        updateTracks(tracks.map(e => e.external_ids.isrc).join(','))
+    }
+
+    const playlistSelections = data!.playlists
+        .map(e => <MenuItem value={e.id}>{e.name}</MenuItem>)
 
     const mainBody = <DynamicPadding>
         <FormControl fullWidth>

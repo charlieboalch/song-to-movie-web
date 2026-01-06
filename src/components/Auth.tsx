@@ -23,7 +23,7 @@ const ServiceButton = styled(Button)`
 `
 
 interface AuthParams {
-    setSpotifySdk: React.Dispatch<React.SetStateAction<SpotifyApi | null>>
+    setSpotifySdk: React.Dispatch<React.SetStateAction<SpotifyApi | string | null>>
 }
 
 export const Auth = ({ setSpotifySdk }: AuthParams) => {
@@ -35,11 +35,16 @@ export const Auth = ({ setSpotifySdk }: AuthParams) => {
         setSpotifySdk(client)
     }
 
+    const noAuth = async () => {
+        setSpotifySdk('n/a')
+    }
+
     return <Content>
         <Typography variant={'h2'}>My Website</Typography>
         <Typography variant={'h4'}>Still Under Construction</Typography>
         <AuthButtons>
             <ServiceButton variant={'contained'} onClick={spotifyAuth}>Log in with Spotify</ServiceButton>
+            <ServiceButton variant={'contained'} onClick={noAuth} color={'error'}>No Auth</ServiceButton>
         </AuthButtons>
     </Content>
 }
