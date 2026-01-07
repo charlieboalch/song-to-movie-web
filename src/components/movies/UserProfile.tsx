@@ -57,10 +57,19 @@ const UserDialog = ({ children }: UserDialogProps) => {
 }
 
 const ZeroAuthProfile = ({searchMenu, trackVectors, tracks}: ZeroAuthProfile) => {
-    return <DynamicPadding>
+    const windowSize = getWindowSize()
+    const mainBody = <DynamicPadding>
         {searchMenu}
         <TrackDetails analysis={trackVectors} expected={(tracks == '') ? 0 : tracks.split(',').length} />
     </DynamicPadding>
+
+    if (windowSize[0] <= 768) {
+        return <UserDialog>
+            {mainBody}
+        </UserDialog>
+    } else {
+        return mainBody
+    }
 }
 
 export const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
