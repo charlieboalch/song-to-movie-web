@@ -19,7 +19,7 @@ const PosterLayout = styled('div')`
 export const MovieResults = ({data}: MovieResultsProps) => {
     if (data == null) {
         return <SubSection>
-            <p>no results</p>
+            <Typography variant={'body2'}>Loading results...</Typography>
         </SubSection>
     }
 
@@ -27,13 +27,13 @@ export const MovieResults = ({data}: MovieResultsProps) => {
         <Typography variant={'h4'} align={'center'}>Most Similar Movies</Typography>
         <MovieGrid>
             {data.movies.map(e =>
-                <MovieDisplay movie={e.movie} score={e.score} url={e.url} />)}
+                <MovieDisplay movie={e.movie} score={e.score} url={e.url} key={e.movie} />)}
         </MovieGrid>
     </SubSection>
 }
 
 const MovieDisplay = ({movie, score, url}: Movie) => {
-    return <PosterLayout key={movie}>
+    return <PosterLayout>
         <img width={128} src={`https://image.tmdb.org/t/p/original${url}`}/>
         <Typography align={'center'} variant={'body2'}>{movie} - {score.toFixed(1)}</Typography>
     </PosterLayout>

@@ -80,12 +80,14 @@ export const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
     const data = promise.read()
 
     useEffect(() => {
+        dispatch(null)
+        addTrackVector([])
+
+        console.log('hello')
+
         if (tracks == '') {
             return
         }
-
-        addTrackVector([])
-        dispatch(null)
 
         const url = getApi() + "rank_movies?songs=" + tracks
 
@@ -117,22 +119,29 @@ export const UserProfile = ({client, promise, dispatch}: UserProfileProps) => {
 
     const dispatchSearch = async () => {
         const foundTrack = await searchTrack(search);
-        if (foundTrack == null) {
+        if (foundTrack == null || tracks.includes(foundTrack.external_ids.isrc)) {
             return
         }
 
-        updateTracks(foundTrack.external_ids.isrc)
+        updateTracks(prev => (prev == '') ? foundTrack.external_ids.isrc : prev + "," + foundTrack.external_ids.isrc)
+        updateSearch('')
+    }
+
+    const clearSearch = async () => {
+        updateTracks('')
+        updateSearch('')
     }
 
     const searchMenu = <Section style={{display: (playlist == '-1') ? 'flex' : 'none', paddingTop: 10}}>
         <TextField
             variant={'outlined'}
             placeholder={'Search...'}
-            style={{flex: 3}}
+            style={{flex: 4}}
             value={search}
             onChange={(e) => updateSearch(e.target.value)}
         />
-        <Button style={{flex: 1}} onClick={dispatchSearch}>Go!</Button>
+        <Button variant={'outlined'} color={'primary'} style={{flex: 1}} onClick={dispatchSearch}>Add</Button>
+        <Button variant={'outlined'} color={'error'} style={{flex: 1}} onClick={clearSearch}>Clear</Button>
     </Section>
 
     const searchTrack = async (title: string) => {
