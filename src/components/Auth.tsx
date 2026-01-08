@@ -43,8 +43,8 @@ export const Auth = ({ setSpotifySdk }: AuthParams) => {
         <Typography variant={'h2'}>My Website</Typography>
         <Typography variant={'h4'}>Still Under Construction</Typography>
         <AuthButtons>
-            <ServiceButton variant={'contained'} onClick={spotifyAuth}>Log in with Spotify</ServiceButton>
-            <ServiceButton variant={'contained'} onClick={noAuth} color={'error'}>No Auth</ServiceButton>
+            <ServiceButton variant={'contained'} disabled onClick={spotifyAuth}>Log in with Spotify</ServiceButton>
+            <ServiceButton variant={'contained'} onClick={noAuth} color={'error'}>Don't log in</ServiceButton>
         </AuthButtons>
     </Content>
 }

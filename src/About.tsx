@@ -18,6 +18,10 @@ export const About = () => {
             <Typography variant={'body1'}>Nearly 1,000 movies are included in the dataset. They are the most popular movies on https://tmdb.com by number of votes. More movies may be added in the future based on performance.</Typography>
         </InfoSection>
         <InfoSection>
+            <Typography variant={'h4'}>Why can't I log in with Spotify?</Typography>
+            <Typography variant={'body1'}>Spotify requires businesses to have 250k monthly active users for websites to use their user authentication API. I neither have a business nor do I have 250k MAU.</Typography>
+        </InfoSection>
+        <InfoSection>
             <Typography variant={'h4'}>Why do songs take forever to load?</Typography>
             <Typography variant={'body1'}>The main bottleneck in the song scoring pipeline is how lyrics are fetched. Unfortunately, there is no (free) unified source of song lyrics that can be gotten programmatically. Instead, data is scraped from https://genius.com, but it takes several seconds per song and sometimes they don't even have lyrics there. After a song is loaded for the first time, it is cached for future use, but it's impossible to preemptively load every song before they're requested. I've tried to offset this by streaming songs as they come in and using a visual progress indicator.</Typography>
         </InfoSection>
